@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    body{
+        background-color:#33475b;
+        color:lightgray;
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Car Registration</title>
+</head>
+<body>
+    <h1>Enter Car details!</h1>
+
+    <form method="post" action="/carReg">
+        <div>
+            <label for="regnr">Registration number:</label><br/>
+            <input id="regnr" type="text" name="regNr" value="" size="8" minlength="6" maxlength="6"></input>
+        </div><br/>
+
+        <div>
+            <label for="carmodel">Car model:</label><br/>
+            <input id="carmodel" type="text" name="model" value="" size="8"></input>
+        </div><br/>
+
+        <div>
+            <label for="myear">Model year:</label><br/>
+            <input id="myear" type="text" name="year" value="" size="8" minlength="4" maxlength="4"></input>
+        </div><br/>
+
+        <input type="Submit" value="Register"/>
+    </form>
+    <p><span th:text="${regged}"></span></p>
+</body>
+</html>

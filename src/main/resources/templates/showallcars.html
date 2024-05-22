@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    body{
+        background-color:#33475b;
+        color:lightgray;
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>Registered cars</title>
+</head>
+<body>
+    <h1>All registered cars:</h1>
+
+    <ul th:each="c:${carlist}">
+        <li th:text="${c.regNr}"></li>
+    </ul>
+</body>
+</html>
