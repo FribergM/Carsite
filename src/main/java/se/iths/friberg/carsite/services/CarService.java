@@ -5,7 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import se.iths.friberg.carsite.db.Car;
 import se.iths.friberg.carsite.db.CarRepository;
-import se.iths.friberg.carsite.dto.UpdateResult;
+
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +24,16 @@ public class CarService{
     car.setRegNr(car.getRegNr().toUpperCase());
         carRepo.save(car);
         return car.getRegNr()+" has been registered!";
+    }
+    
+    @Transactional
+    public Car restRegister(Car car){
+        if(carRepo.existsByRegNr(car.getRegNr())){
+            return null;
+        }
+        car.setRegNr(car.getRegNr().toUpperCase());
+        carRepo.save(car);
+        return car;
     }
 
     public boolean existsByRegNr(String regNr){
@@ -45,17 +55,18 @@ public class CarService{
     }
 
     @Transactional
-    public UpdateResult updateCar(String regNr, Car updatedCar){
-        if(!existsByRegNr(regNr)){
-            return new UpdateResult(false, "No such car registered.");
+    public Car updateCar(String regNr, Car updatedCar){
+        
+        Car car = carRepo.findById(regNr).orElse(null);
+        if(car == null){
+            return null;
         }
-
-        Car car = carRepo.findById(regNr).orElseThrow(() -> new RuntimeException("Car was not found."));
+        
         car.setModel(updatedCar.getModel());
         car.setYear(updatedCar.getYear());
         carRepo.save(car);
 
-        return new UpdateResult(true, car);
+        return car;
     }
 
     @Transactional

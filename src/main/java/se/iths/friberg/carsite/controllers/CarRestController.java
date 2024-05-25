@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import se.iths.friberg.carsite.db.Car;
-import se.iths.friberg.carsite.dto.UpdateResult;
 import se.iths.friberg.carsite.services.CarService;
 
 import java.util.List;
@@ -31,13 +30,12 @@ public class CarRestController{
 
     @PostMapping
     public ResponseEntity<?> addCar(@RequestBody Car car){
-        String response = carService.register(car);
+        Car registeredCar = carService.restRegister(car);
 
-        if(response.contains("already registered")){
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(response);
+        if(registeredCar == null){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(car.getRegNr()+" is already registered!");
         }
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(car);
+        return ResponseEntity.status(HttpStatus.CREATED).body(registeredCar);
     }
 
     @GetMapping("/all")
@@ -47,44 +45,43 @@ public class CarRestController{
     }
 
     @GetMapping("/{regNr}")
-    public ResponseEntity<?> findByRegNr(@PathVariable("regNr") String regNr){
+    public ResponseEntity<Car> findByRegNr(@PathVariable("regNr") String regNr){
         Optional<Car> car = carService.findByRegNr(regNr);
 
         if(car.isPresent()){
             return ResponseEntity.ok(car.get());
         }
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/model/{model}")
-    public ResponseEntity<?> findByModel(@PathVariable("model") String model){
+    public ResponseEntity<List<Car>> findByModel(@PathVariable("model") String model){
         List<Car> cars = carService.findByModel(model);
 
         return ResponseEntity.ok(cars);
     }
 
     @GetMapping("/year/{year}")
-    public ResponseEntity<?> findByYear(@PathVariable("year") int year){
+    public ResponseEntity<List<Car>> findByYear(@PathVariable("year") int year){
         List<Car> cars = carService.findByYear(year);
 
         return ResponseEntity.ok(cars);
     }
 
     @PutMapping("/{regNr}")
-    public ResponseEntity<?> updateCar(@PathVariable("regNr") String regNr,
+    public ResponseEntity<Car> updateCar(@PathVariable("regNr") String regNr,
                                        @RequestBody Car updatedCar){
 
         if(!regNr.equals(updatedCar.getRegNr())){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("RegNr in header and body do not match.");
+            return ResponseEntity.badRequest().build();
         }
 
-        UpdateResult result = carService.updateCar(regNr, updatedCar);
+        Car car = carService.updateCar(regNr, updatedCar);
 
-        if(result.success){
-            return ResponseEntity.ok(result.car);
-        }else{
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(result.statusMessage);
+        if(car == null){
+            return ResponseEntity.notFound().build();
         }
+        return ResponseEntity.ok(car);
 
     }
 
@@ -100,7 +97,7 @@ public class CarRestController{
         boolean deleted = carService.removeCar(regNr);
 
         if(deleted){
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.noContent().build();
         }else{
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Failed to delete car with RegNr: " + regNr);
         }
